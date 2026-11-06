@@ -1,11 +1,13 @@
 import { INTERVALS, loadCandles, PAIRS } from './data.js';
 import { runBacktest } from './engine.js';
 import { parseForm } from './form.js';
-import { summarize } from './report.js';
+import { summarize, tradesToCsv } from './report.js';
 import { MAX_CONDITIONS } from './rules.js';
 
 const DEFAULT_PERIOD = { sma: 50, ema: 20, rsi: 14 };
 const $ = (id) => document.getElementById(id);
+
+let lastRun = null;
 
 function fillSelect(select, values) {
   select.append(...values.map((value) => new Option(value, value)));
@@ -88,6 +90,42 @@ function showSummary(summary) {
   );
 }
 
+const utc = (time) => new Date(time).toISOString().slice(0, 16).replace('T', ' ');
+
+function showTrades(trades) {
+  $('no-trades').hidden = trades.length > 0;
+  $('trades-block').hidden = trades.length === 0;
+  $('trades').replaceChildren(
+    ...trades.map((trade) => {
+      const row = document.createElement('tr');
+      const cells = [
+        utc(trade.entryTime),
+        trade.entryPrice,
+        utc(trade.exitTime),
+        trade.exitPrice,
+        trade.fees.toFixed(2),
+        trade.pnl.toFixed(2),
+        trade.exitReason === 'end' ? 'End of period' : 'Exit rule',
+      ];
+      row.append(...cells.map((text) => {
+        const cell = document.createElement('td');
+        cell.textContent = text;
+        return cell;
+      }));
+      return row;
+    }),
+  );
+}
+
+function downloadCsv() {
+  const url = URL.createObjectURL(new Blob([tradesToCsv(lastRun.trades)], { type: 'text/csv' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = lastRun.fileName;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function sourceNote({ candles, source, interval, fetchedAt }) {
   if (source === 'live') return `${candles.length} ${interval} candles from Binance.`;
   const date = fetchedAt.slice(0, 10);
@@ -106,7 +144,10 @@ async function run(event) {
       $('status').textContent = `${sourceNote(data)} Choose another period.`;
       return;
     }
-    showSummary(summarize(runBacktest(data.candles, strategy), strategy.stake));
+    const trades = runBacktest(data.candles, strategy);
+    lastRun = { trades, fileName: `backtest-${request.symbol}-${data.interval}.csv` };
+    showSummary(summarize(trades, strategy.stake));
+    showTrades(trades);
     $('results').hidden = false;
     $('status').textContent = sourceNote(data);
   } catch (error) {
@@ -132,3 +173,4 @@ for (const fieldset of [$('entry'), $('exit')]) {
   fieldset.querySelector('.add').addEventListener('click', () => addCondition(fieldset));
 }
 $('form').addEventListener('submit', run);
+$('download').addEventListener('click', downloadCsv);

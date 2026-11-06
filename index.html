@@ -44,6 +44,26 @@
   <section id="results" hidden>
     <h2>Results</h2>
     <dl id="summary"></dl>
+
+    <h3>Trades</h3>
+    <p id="no-trades" hidden>No trades in this period.</p>
+    <div id="trades-block">
+      <button type="button" id="download">Download CSV</button>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Entry (UTC)</th>
+            <th scope="col">Entry price</th>
+            <th scope="col">Exit (UTC)</th>
+            <th scope="col">Exit price</th>
+            <th scope="col">Fees, USDT</th>
+            <th scope="col">P&amp;L, USDT</th>
+            <th scope="col">Closed by</th>
+          </tr>
+        </thead>
+        <tbody id="trades"></tbody>
+      </table>
+    </div>
   </section>
 
   <template id="condition-template">
