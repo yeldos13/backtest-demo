@@ -4,8 +4,73 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Strategy Backtest Demo</title>
+  <script type="module" src="src/app.js"></script>
 </head>
 <body>
   <h1>Strategy Backtest Demo</h1>
+
+  <form id="form" novalidate>
+    <fieldset>
+      <legend>Market</legend>
+      <label>Pair <select id="symbol"></select></label>
+      <label>Candles <select id="interval"></select></label>
+      <label>From <input id="start" type="date"></label>
+      <label>To <input id="end" type="date"></label>
+    </fieldset>
+
+    <fieldset id="entry">
+      <legend>Enter long when all of these hold</legend>
+      <div class="conditions"></div>
+      <button type="button" class="add">Add condition</button>
+    </fieldset>
+
+    <fieldset id="exit">
+      <legend>Exit when all of these hold</legend>
+      <div class="conditions"></div>
+      <button type="button" class="add">Add condition</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>Trade</legend>
+      <label>Stake per trade, USDT <input id="stake" type="number" min="0" step="any" value="1000"></label>
+      <label>Fee per side, % <input id="fee" type="number" min="0" step="any" value="0.1"></label>
+    </fieldset>
+
+    <button type="submit" id="run">Run backtest</button>
+  </form>
+
+  <p id="status" role="status"></p>
+
+  <section id="results" hidden>
+    <h2>Results</h2>
+    <dl id="summary"></dl>
+  </section>
+
+  <template id="condition-template">
+    <div class="condition">
+      <select class="left-type" aria-label="Left side">
+        <option value="price">Price</option>
+        <option value="sma">SMA</option>
+        <option value="ema">EMA</option>
+        <option value="rsi">RSI</option>
+      </select>
+      <input class="left-number" type="number" min="1" max="500" step="1" aria-label="Left side period">
+      <select class="op" aria-label="Comparison">
+        <option value="crosses_above">crosses above</option>
+        <option value="crosses_below">crosses below</option>
+        <option value="&gt;">is above</option>
+        <option value="&lt;">is below</option>
+      </select>
+      <select class="right-type" aria-label="Right side">
+        <option value="value">Value</option>
+        <option value="price">Price</option>
+        <option value="sma">SMA</option>
+        <option value="ema">EMA</option>
+        <option value="rsi">RSI</option>
+      </select>
+      <input class="right-number" type="number" step="any" aria-label="Right side value or period">
+      <button type="button" class="remove">Remove</button>
+    </div>
+  </template>
 </body>
 </html>
