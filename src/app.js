@@ -1,7 +1,8 @@
+import { drawEquityChart } from './chart.js';
 import { INTERVALS, loadCandles, PAIRS } from './data.js';
 import { runBacktest } from './engine.js';
 import { parseForm } from './form.js';
-import { summarize, tradesToCsv } from './report.js';
+import { equityCurve, summarize, tradesToCsv } from './report.js';
 import { MAX_CONDITIONS } from './rules.js';
 
 const DEFAULT_PERIOD = { sma: 50, ema: 20, rsi: 14 };
@@ -117,6 +118,13 @@ function showTrades(trades) {
   );
 }
 
+// Needs a visible container, because the chart is sized to its real width.
+function showChart() {
+  const { trades, stake } = lastRun;
+  $('equity-block').hidden = trades.length === 0;
+  if (trades.length > 0) drawEquityChart($('equity-chart'), equityCurve(trades, stake), stake);
+}
+
 function downloadCsv() {
   const url = URL.createObjectURL(new Blob([tradesToCsv(lastRun.trades)], { type: 'text/csv' }));
   const link = document.createElement('a');
@@ -145,10 +153,11 @@ async function run(event) {
       return;
     }
     const trades = runBacktest(data.candles, strategy);
-    lastRun = { trades, fileName: `backtest-${request.symbol}-${data.interval}.csv` };
+    lastRun = { trades, stake: strategy.stake, fileName: `backtest-${request.symbol}-${data.interval}.csv` };
     showSummary(summarize(trades, strategy.stake));
     showTrades(trades);
     $('results').hidden = false;
+    showChart();
     $('status').textContent = sourceNote(data);
   } catch (error) {
     $('status').textContent = error.message;
@@ -174,3 +183,6 @@ for (const fieldset of [$('entry'), $('exit')]) {
 }
 $('form').addEventListener('submit', run);
 $('download').addEventListener('click', downloadCsv);
+window.addEventListener('resize', () => {
+  if (!$('results').hidden) showChart();
+});
