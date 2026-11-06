@@ -69,7 +69,7 @@ const SERIES = 'var(--series-1, #2a78d6)';
 const SURFACE = 'var(--surface, #fcfcfb)';
 
 export function drawEquityChart(container, curve, stake) {
-  const g = equityGeometry(curve, stake, Math.max(container.clientWidth, 320));
+  const g = equityGeometry(curve, stake, Math.max(container.clientWidth, 240));
   const first = curve[0];
   const last = curve[curve.length - 1];
   const root = svg('svg', {
@@ -90,6 +90,8 @@ export function drawEquityChart(container, curve, stake) {
     );
   }
   g.xTicks.forEach(({ time, x }, i) => {
+    // Three dates do not fit side by side on a phone.
+    if (i === 1 && g.right - g.left < 240) return;
     const anchor = ['start', 'middle', 'end'][i];
     root.append(svg('text', { x, y: g.height - 8, 'text-anchor': anchor, fill: INK }, day(time)));
   });

@@ -81,12 +81,14 @@ function showSummary(summary) {
     ['Fees paid', money(summary.totalFees)],
   ];
   $('summary').replaceChildren(
-    ...rows.flatMap(([term, detail]) => {
+    ...rows.map(([term, detail]) => {
+      const group = document.createElement('div');
       const dt = document.createElement('dt');
       const dd = document.createElement('dd');
       dt.textContent = term;
       dd.textContent = detail;
-      return [dt, dd];
+      group.append(dt, dd);
+      return group;
     }),
   );
 }
@@ -134,22 +136,30 @@ function downloadCsv() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function sourceNote({ candles, source, interval, fetchedAt }) {
+function setStatus(text, kind = '') {
+  $('status').textContent = text;
+  $('status').dataset.kind = kind;
+}
+
+function sourceNote({ candles, source, interval, fetchedAt }, requestedInterval) {
   if (source === 'live') return `${candles.length} ${interval} candles from Binance.`;
+  const swapped = interval === requestedInterval ? '' : ` instead of ${requestedInterval}`;
   const date = fetchedAt.slice(0, 10);
-  return `Binance is unavailable, so this uses ${candles.length} saved ${interval} candles from ${date}.`;
+  return `Binance is unavailable, so this uses ${candles.length} ${interval} candles${swapped}, saved on ${date}.`;
 }
 
 async function run(event) {
   event.preventDefault();
   $('run').disabled = true;
   $('results').hidden = true;
-  $('status').textContent = 'Loading prices...';
+  setStatus('Loading prices...');
   try {
     const { request, strategy } = parseForm(readForm());
     const data = await loadCandles(request);
+    const note = sourceNote(data, request.interval);
+    const kind = data.source === 'snapshot' ? 'warning' : '';
     if (data.candles.length === 0) {
-      $('status').textContent = `${sourceNote(data)} Choose another period.`;
+      setStatus(`${note} Choose another period.`, kind);
       return;
     }
     const trades = runBacktest(data.candles, strategy);
@@ -158,9 +168,9 @@ async function run(event) {
     showTrades(trades);
     $('results').hidden = false;
     showChart();
-    $('status').textContent = sourceNote(data);
+    setStatus(note, kind);
   } catch (error) {
-    $('status').textContent = error.message;
+    setStatus(error.message, 'error');
   } finally {
     $('run').disabled = false;
   }

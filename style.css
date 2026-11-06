@@ -1,0 +1,198 @@
+:root {
+  color-scheme: light dark;
+  --page: #f4f3f0;
+  --surface: #fcfcfb;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --grid: #e4e3df;
+  --border: #c9c8c2;
+  --series-1: #2a78d6;
+  --accent: #1f66bd;
+  --on-accent: #ffffff;
+  --warning: #b97700;
+  --error: #d03b3b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #121211;
+    --surface: #1a1a19;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --grid: #383835;
+    --border: #57564f;
+    --series-1: #3987e5;
+    --accent: #3987e5;
+    --on-accent: #0b0b0b;
+    --warning: #d59a1f;
+    --error: #e66767;
+  }
+}
+
+* { box-sizing: border-box; }
+
+/* Author display rules would otherwise beat the hidden attribute. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text-primary);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+main, header, footer {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+header { padding-top: 32px; }
+h1 { margin: 0 0 4px; font-size: 1.75rem; line-height: 1.2; }
+h2 { margin: 0 0 16px; font-size: 1.25rem; }
+h3 { margin: 24px 0 4px; font-size: 1rem; }
+header p, footer, .note { color: var(--text-secondary); }
+header p { margin: 0 0 24px; }
+.note { margin: 0 0 12px; font-size: 0.875rem; }
+
+form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  border-radius: 8px;
+}
+
+.wide { grid-column: 1 / -1; }
+
+legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 0;
+  font-weight: 600;
+}
+
+.fields {
+  clear: both;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+input, select, button {
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+label input, label select { width: 100%; }
+button { cursor: pointer; }
+button:disabled { cursor: progress; opacity: 0.6; }
+
+:is(input, select, button, a, .table-wrap):focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 2px;
+}
+
+.conditions {
+  clear: both;
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.condition {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.condition input { width: 96px; }
+
+#run {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding: 8px 24px;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+#status { margin: 16px 0; }
+#status:empty { display: none; }
+
+#status:is([data-kind="warning"], [data-kind="error"]) {
+  padding: 8px 12px;
+  background: var(--surface);
+  border-left: 4px solid var(--warning);
+  border-radius: 4px;
+}
+
+#status[data-kind="error"] { border-left-color: var(--error); }
+
+#results {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  border-radius: 8px;
+}
+
+#summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+#summary dt { font-size: 0.875rem; color: var(--text-secondary); }
+#summary dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+#download { margin: 8px 0; }
+
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+th, td {
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--grid);
+  text-align: left;
+}
+
+th { font-weight: 600; color: var(--text-secondary); }
+
+:is(th, td):is(:nth-child(2), :nth-child(4), :nth-child(5), :nth-child(6)) { text-align: right; }
+
+footer { padding-bottom: 32px; font-size: 0.875rem; }
+a { color: var(--accent); }
+
+@media (max-width: 640px) {
+  form { grid-template-columns: minmax(0, 1fr); }
+}
